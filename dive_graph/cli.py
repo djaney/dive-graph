@@ -11,7 +11,8 @@ import numpy as np
 @click.command()
 @click.argument("input_path", type=click.Path(exists=True, resolve_path=True))
 @click.option("-i", "--index", type=int, help="Index of the dive to print. Interactive if not set")
-def show_graph(input_path: click.Path, index=None):
+@click.option("-p", "--pdf", "pdf", type=click.Path(exists=False), help="Create PDF")
+def show_graph(input_path: click.Path, index=None, pdf=None):
     """
     Show a graph of the dive data.
 
@@ -40,7 +41,10 @@ def show_graph(input_path: click.Path, index=None):
             dive = session.get_dive(idx)
             dive.finish()
             dives.append(dive)
-        if index is None:
+
+        if pdf:
+            pass
+        elif index is None:
             for i, dive in enumerate(dives):
                 click.echo(f"{i}. {int(dive._peak['depth'])}m")
             selection_idx = click.prompt("Which dive to show? (index)",
@@ -48,16 +52,26 @@ def show_graph(input_path: click.Path, index=None):
         else:
             selection_idx = index
 
-        selection = dives[int(selection_idx)]
-        dive.events_to_annotations()
-        _show_graph(selection)
+        if pdf is not None:
+            from matplotlib.backends.backend_pdf import PdfPages
+            pp = PdfPages(pdf)
+            figures = [_plot_dive(dive, i) for i, dive in enumerate(dives)]
+            for fig in figures:
+                fig.savefig(pp, format='pdf')
+            pp.close()
+
+        else:
+            selection = dives[int(selection_idx)]
+            _plot_dive(selection, 0)
+            plt.show()
 
 
 def _is_activity_file(file_name):
     return file_name[-12:] == "ACTIVITY.fit"
 
 
-def _show_graph(dive: Dive):
+def _plot_dive(dive: Dive, figure_id: int):
+    # dive.events_to_annotations()
     time_depth = dive.get_plot_data()
     start_ts = dive.timeline[0]['timestamp']
 
@@ -66,7 +80,7 @@ def _show_graph(dive: Dive):
 
     mid_x = _point_to_x(dive._peak)
 
-    fig = plt.figure()
+    fig = plt.figure(figure_id)
 
     ax1 = fig.add_subplot(1, 1, 1)
     ax1.set_xlabel('Time')
@@ -101,4 +115,9 @@ def _show_graph(dive: Dive):
     by_label = dict(zip(labels, lines))
     plt.legend(by_label.values(), by_label.keys(), loc=9)
 
-    plt.show()
+    return fig
+
+
+def _plot(dives):
+    for i, dive in enumerate(dives):
+        _plot_dive(dive, i)
