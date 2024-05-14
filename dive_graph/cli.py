@@ -88,7 +88,7 @@ def _show_graph(dive: Dive):
     for p in dive.timeline:
         peak_rate = max(peak_rate, abs(p['rate']))
         rates[1].append(p['rate'])
-    line2 = ax2.plot(rates[0], smooth(rates[1], 16), color='tab:red', label="Rate")
+    line2 = ax2.plot(rates[0], rates[1], color='tab:red', label="Rate")
     ax2.set_ylabel('Rate')
     ax2.set_ylim([-peak_rate, peak_rate])
 
@@ -102,9 +102,3 @@ def _show_graph(dive: Dive):
     plt.legend(by_label.values(), by_label.keys(), loc=9)
 
     plt.show()
-
-
-def smooth(y, box_pts):
-    box = np.ones(box_pts) / box_pts
-    y_smooth = np.convolve(y, box, mode='same')
-    return y_smooth
