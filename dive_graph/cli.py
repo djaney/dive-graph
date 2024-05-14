@@ -100,6 +100,9 @@ def _plot_dive(dive: Dive, figure_id: int):
     rates = (time_depth[0], [])
     peak_rate = 0
     for p in dive.timeline:
+        if 'rate' not in p:
+            rates[1].append(0)
+            continue
         peak_rate = max(peak_rate, abs(p['rate']))
         rates[1].append(p['rate'])
     line2 = ax2.plot(rates[0], rates[1], color='tab:red', label="Rate")
