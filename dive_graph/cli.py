@@ -56,8 +56,8 @@ def show_graph(input_path: click.Path, index=None):
 def _is_activity_file(file_name):
     return file_name[-12:] == "ACTIVITY.fit"
 
-def _show_graph(dive: Dive):
 
+def _show_graph(dive: Dive):
     time_depth = dive.get_plot_data()
     start_ts = dive.timeline[0]['timestamp']
 
@@ -72,7 +72,7 @@ def _show_graph(dive: Dive):
     ax1.set_xlabel('Time')
     ax1.set_ylabel('Depth')
     # plot dive
-    ax1.plot(*time_depth, color='tab:blue')
+    line1 = ax1.plot(*time_depth, color='tab:blue', label="Depth")
     # plot alarms
     for point in dive.timeline:
         if 'events' in point:
@@ -88,16 +88,23 @@ def _show_graph(dive: Dive):
     for p in dive.timeline:
         peak_rate = max(peak_rate, abs(p['rate']))
         rates[1].append(p['rate'])
-    ax2.plot(rates[0], smooth(rates[1], 16), color='tab:red')
+    line2 = ax2.plot(rates[0], smooth(rates[1], 16), color='tab:red', label="Rate")
     ax2.set_ylabel('Rate')
     ax2.set_ylim([-peak_rate, peak_rate])
 
-    fig.tight_layout()
+    # fig.tight_layout()
     plt.title(f"{dive._peak['depth']:.1f}m")
+
+    # added these three lines
+    lines = line1 + line2
+    labels = [l.get_label() for l in lines]
+    by_label = dict(zip(labels, lines))
+    plt.legend(by_label.values(), by_label.keys(), loc=9)
+
     plt.show()
 
 
 def smooth(y, box_pts):
-    box = np.ones(box_pts)/box_pts
+    box = np.ones(box_pts) / box_pts
     y_smooth = np.convolve(y, box, mode='same')
     return y_smooth

@@ -1,5 +1,11 @@
 # Dive Graph
 
+## Install
+
+    pip install git+https://github.com/djaney/dive-graph.git
+
+## Usage
+```
 Usage: dive-graph [OPTIONS] INPUT_PATH
 
   Show a graph of the dive data.
@@ -8,4 +14,9 @@ Usage: dive-graph [OPTIONS] INPUT_PATH
 
 Options:
   -i, --index INTEGER  Index of the dive to print. Interactive if not set
-  --help               Show this message and exit.
+  --help               Show this message and exit.     
+```
+
+## Screenshots
+
+![Screenshot1](media/screenshot1.png)
